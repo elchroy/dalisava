@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\DataTransferObjects\NotificationDTO;
 use App\Http\Controllers\Controller;
 use App\Models\Agent;
 use App\Models\NotificationLog;
@@ -25,44 +24,18 @@ class AgentController extends Controller
     {
         $lat = $request->input('latitude');
         $lng = $request->input('longitude');
-        // $agentCode = $request->input('next_agent_code'); // next node in path
+        $agentCode = $request->input('next_agent_code'); // next node in path
 
-        // if (! $agentCode || ! $lat || ! $lng) {
-        //     return response()->json(['error' => 'Missing required data'], 422);
-        // }
+        if (! $agentCode || ! $lat || ! $lng) {
+            return response()->json(['error' => 'Missing required data'], 422);
+        }
 
-        // $agent = Agent::where('code', $agentCode)->first();
-        // $agent = Agent::first();
+        $agent = Agent::where('code', $agentCode)->first();
 
         // Get random agent
-        $agent = Agent::inRandomOrder()->first();
-
         if (! $agent) {
             return response()->json(['error' => 'Agent not found'], 404);
         }
-
-        // $withinRadius = $this->isWithinRadius($lat, $lng, $agent->latitude, $agent->longitude, 50); // 50m radius
-        // dump($withinRadius);
-        $messageData = NotificationMessageResolver::resolve($agent);
-
-        // if (! $withinRadius) {
-        //     return response()->json([
-        //         'status' => 'ok',
-        //         'near' => false,
-        //         'agent_code' => $agent->code,
-        //         'agent_type' => $agent->type,
-        //         'agent_state' => $agent->state,
-        //         'notification_type' => 'KEEP_DRIVING',
-        //         'message' => $messageData['text'],
-        //     ]);
-        // }
-
-        // $dto = new NotificationDTO(
-        //     agent_id: $agent->id,
-        //     agent_type: $agent->type,
-        //     notification_type: $messageData['type'],
-        //     message: $messageData['text']
-        // );
 
         return response()->json([
             'status' => 'ok',
@@ -70,11 +43,7 @@ class AgentController extends Controller
             'agent_code' => $agent->code,
             'agent_type' => $agent->type,
             'agent_state' => $agent->state,
-            'notification_type' => data_get($messageData, 'type'),
-            // 'message' => data_get($messageData, 'text',),
-            // 'message' => '⚠️ Accident ahead. Proceed with caution. Or take alternate route.',
-            // 'message' => '🚨 Danger detected. Slow down immediately.',
-            'message' => NotificationMessageResolver::resolveRandom(),
+            'message' => NotificationMessageResolver::resolve($agent),
         ]);
     }
 

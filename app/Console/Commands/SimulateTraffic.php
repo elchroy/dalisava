@@ -32,7 +32,7 @@ class SimulateTraffic extends Command
         $this->info('Starting traffic simulation... (press Ctrl+C to stop)');
 
         while (true) {
-            $agents = Agent::inRandomOrder()->limit(5)->get();
+            $agents = Agent::inRandomOrder()->limit(1)->get();
 
             foreach ($agents as $agent) {
                 $oldState = $agent->state;
