@@ -120,9 +120,12 @@
 
             <div id="map" style="height: 800px;"></div>
 
+            @php
+                $apiKey = env('GOOGLE_MAPS_API_KEY');
+            @endphp
 
-            <script
-                src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDARry_C99gjwL6nmRZo51Llu4sK8lf50g&libraries=maps,marker&v=beta"
+
+            <script src="https://maps.googleapis.com/maps/api/js?key={{ $apiKey }}&libraries=maps,marker&v=beta"
                 defer></script>
 
             <script defer>
