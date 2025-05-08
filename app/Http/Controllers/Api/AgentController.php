@@ -7,6 +7,7 @@ use App\Models\Agent;
 use App\Models\NotificationLog;
 use App\Support\NotificationMessageResolver;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class AgentController extends Controller
 {
@@ -22,20 +23,27 @@ class AgentController extends Controller
 
     public function notifyNextAgents(Request $request)
     {
-        $lat = $request->input('latitude');
-        $lng = $request->input('longitude');
-        $agentCode = $request->input('next_agent_code'); // next node in path
+        // $lat = $request->input('latitude');
+        // $lng = $request->input('longitude');
 
-        if (! $agentCode || ! $lat || ! $lng) {
-            return response()->json(['error' => 'Missing required data'], 422);
-        }
+        // if (! $agentCode || ! $lat || ! $lng) {
+        //     return response()->json(['message' => 'Lat/Lng not sent'], 422);
+        // }
 
+        $agentCode = $request->input('next_agent_code');
+        $allTxt = json_encode($request->all());
+        // Log::info("Agent code: {$allTxt}");
         $agent = Agent::where('code', $agentCode)->first();
 
         // Get random agent
         if (! $agent) {
-            return response()->json(['error' => 'Agent not found'], 404);
+            Log::info("Agent code not found: {$agentCode}");
+
+            return response()->json(['message' => 'Invalid agent code'], 404);
         }
+
+        $message = NotificationMessageResolver::resolve($agent);
+        Log::info("Agent code found: {$agentCode} ==> Message: {$message}");
 
         return response()->json([
             'status' => 'ok',
@@ -43,8 +51,31 @@ class AgentController extends Controller
             'agent_code' => $agent->code,
             'agent_type' => $agent->type,
             'agent_state' => $agent->state,
-            'message' => NotificationMessageResolver::resolve($agent),
+            'message' => $message,
         ]);
+    }
+
+    public function getAgentStates()
+    {
+        $agents = Agent::all();
+
+        $agentStates = [];
+
+        foreach ($agents as $agent) {
+            $agentStates[] = [
+                'code' => $agent->code,
+                'name' => $agent->name,
+                'type' => $agent->type,
+                'state' => $agent->state,
+                'latitude' => $agent->latitude,
+                'longitude' => $agent->longitude,
+            ];
+        }
+
+        return response()->json([
+            'status' => 'ok',
+            'agents' => $agentStates,
+        ])->setEncodingOptions(JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
     }
 
     private function isWithinRadius($lat1, $lng1, $lat2, $lng2, float $radius)

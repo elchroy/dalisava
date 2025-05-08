@@ -31,12 +31,14 @@ class SimulateTraffic extends Command
     {
         $this->info('Starting traffic simulation... (press Ctrl+C to stop)');
 
+        $states = ['R', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'Y'];
+
         while (true) {
-            $agents = Agent::inRandomOrder()->limit(1)->get();
+            $agents = Agent::inRandomOrder()->limit(2)->get();
 
             foreach ($agents as $agent) {
                 $oldState = $agent->state;
-                $newState = collect(['R', 'G', 'B', 'Y'])->reject(fn ($s) => $s === $oldState)->random();
+                $newState = collect($states)->reject(fn ($s) => $s === $oldState)->random();
                 $agent->update(['state' => $newState]);
 
                 EventLog::create([

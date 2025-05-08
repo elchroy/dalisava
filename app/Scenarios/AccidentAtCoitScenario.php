@@ -9,10 +9,10 @@ class AccidentAtCoitScenario implements TrafficScenario
 {
     public function run(): void
     {
-        // $accidentAgentCode = 'campbell-rd-coit-rd';
-        // Agent::where('code', $accidentAgentCode)->update(['state' => 'R']);
-        // // All others green
-        // Agent::where('code', '!=', $accidentAgentCode)->update(['state' => 'G']);
+        $accidentAgentCode = 'Agent3';
+        Agent::where('code', $accidentAgentCode)->update(['state' => 'R']);
+        // All others green
+        Agent::where('code', '!=', $accidentAgentCode)->update(['state' => 'G']);
 
         // // Add reroute waypoint (pretend alternate street)
         // DB::table('agents')->where([
